@@ -377,3 +377,53 @@ def health_api(app):
             return jsonify(response)
         except Exception as e:
             return jsonify({"status": "error", "message": str(e)}), 500
+#!/bin/bash
+
+# ---------------------------------------
+# Mix Platform Startup Script
+# ---------------------------------------
+# هذا السكربت يقوم بتشغيل المنصة من الهاتف أو أي بيئة Python 3
+# يتأكد من الملفات الأساسية ويشغل backend وfrontend تلقائيًا
+# ---------------------------------------
+
+echo "🔹 Starting Mix Platform..."
+
+# --- تحقق من الملفات الأساسية ---
+FILES=("mix.config.json" "backend/app.py" "frontend/index.html")
+for file in "${FILES[@]}"; do
+    if [ -f "$file" ]; then
+        echo " Found $file"
+    else
+        echo " Missing $file — please check your Mix repository"
+    fi
+done
+
+# --- تحقق من Python 3 ---
+if command -v python3 &> /dev/null; then
+    PYTHON_VERSION=$(python3 --version)
+    echo " Python installed: $PYTHON_VERSION"
+else
+    echo " Python 3 not installed. Please install Python 3.x"
+    exit 1
+fi
+
+# --- تشغيل backend ---
+echo " Launching backend..."
+cd backend || exit
+python3 app.py &
+BACKEND_PID=$!
+cd ..
+
+# --- تحقق من PWA frontend ---
+if [ -f "frontend/index.html" ]; then
+    echo " frontend/index.html exists — ready for PWA"
+else
+    echo " frontend/index.html missing"
+fi
+
+echo " Mix Platform backend is running with PID $BACKEND_PID"
+echo "💻 You can now open frontend/index.html in a browser to access Mix Platform"
+
+# --- الانتظار لتجنب خروج السكربت ---
+echo "Press Ctrl+C to stop Mix Platform"
+wait $BACKEND_PID
