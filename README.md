@@ -228,5 +228,90 @@ def ai_analyze():
 if __name__ == "__main__":
     host = "0.0.0.0"
     port = int(os.environ.get("PORT", 5000))
-    print(f"🚀 Starting Mix Platform backend on {host}:{port}")
+    print(f" Starting Mix Platform backend on {host}:{port}")
     app.run(host=host, port=port)
+import json
+import os
+import sys
+
+# ---------------------------
+# مسار Base للمنصة
+# ---------------------------
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# ---------------------------
+# تحميل الذاكرة المركزية (mix.config.json)
+# ---------------------------
+def load_memory():
+    config_path = os.path.join(BASE_DIR, "mix.config.json")
+    if not os.path.exists(config_path):
+        print(f" mix.config.json not found at {config_path}")
+        sys.exit(1)
+    try:
+        with open(config_path, "r") as f:
+            config = json.load(f)
+        return config
+    except json.JSONDecodeError as e:
+        print(f" Error parsing mix.config.json: {e}")
+        sys.exit(1)
+
+# ---------------------------
+# حفظ بيانات مؤقتة أو تحديثات المنصة
+# ---------------------------
+def save_memory(data, filename="data.json"):
+    storage_path = load_memory().get("storage_path", "/tmp/Mix/storage")
+    if not os.path.exists(storage_path):
+        os.makedirs(storage_path)
+    file_path = os.path.join(storage_path, filename)
+    try:
+        with open(file_path, "w") as f:
+            json.dump(data, f, indent=4)
+        return True
+    except Exception as e:
+        print(f" Failed to save memory to {file_path}: {e}")
+        return False
+
+# ---------------------------
+# التحقق من مسار التخزين وملفات المنصة
+# ---------------------------
+def verify_storage():
+    config = load_memory()
+    storage_path = config.get("storage_path", "/tmp/Mix/storage")
+    if not os.path.exists(storage_path):
+        os.makedirs(storage_path)
+    # تحقق من المجلدات الأساسية
+    folders = ["logs", "cache", "backup"]
+    for folder in folders:
+        path = os.path.join(storage_path, folder)
+        if not os.path.exists(path):
+            os.makedirs(path)
+    print(f" Storage verified at {storage_path}")
+    return storage_path
+
+# ---------------------------
+# إصلاح تلقائي (Self-Heal)
+# ---------------------------
+def self_heal():
+    try:
+        storage = verify_storage()
+        # يمكن إضافة إجراءات إضافية للفحص والإصلاح
+        print(" Self-Heal: storage verified")
+        return True
+    except Exception as e:
+        print(f" Self-Heal failed: {e}")
+        return False
+
+# ---------------------------
+# مثال قراءة بيانات المستخدم أو GPS
+# ---------------------------
+def load_data(filename="data.json"):
+    storage_path = verify_storage()
+    file_path = os.path.join(storage_path, filename)
+    if not os.path.exists(file_path):
+        return {}
+    try:
+        with open(file_path, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        print(f" Failed to load {file_path}: {e}")
+        return {}
