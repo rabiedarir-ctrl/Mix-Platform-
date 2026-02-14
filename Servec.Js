@@ -61,5 +61,5 @@ app.delete("/api/chairs/:id", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Mix running on http://localhost:${PORT}`);
+  console.log(` Mix running on http://localhost:${PORT}`);
 });
