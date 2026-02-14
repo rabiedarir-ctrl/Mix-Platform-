@@ -480,4 +480,216 @@ else
 fi
 
 echo " Mix Platform pre-check completed."
-echo "You can now run scripts/start.sh to launch Mix Platform."
+echo "You can now run scripts/start.sh to launch Mix 
+Platform."
+
+index.html (الصفحة الرئيسية)
+
+Html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mix Platform</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Welcome to Mix Platform</h1>
+
+<div class="center">
+  <a href="login.html"><button>Login</button></a>
+  <a href="register.html"><button>Register</button></a>
+</div>
+
+</body>
+</html>
+
+ register.html (تسجيل حساب)
+
+Html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Register - Mix</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Create Account</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="register()">Register</button>
+
+<p><a href="login.html">Already have account?</a></p>
+
+<script>
+async function register() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email, password })
+  });
+
+  if(res.ok){
+    alert("Registered successfully");
+    window.location.href = "login.html";
+  } else {
+    alert("Error");
+  }
+}
+</script>
+
+</body>
+</html>
+
+ login.html (تسجيل دخول)
+
+Html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login - Mix</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h2>Login</h2>
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+
+<p><a href="register.html">Create account</a></p>
+
+<script>
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    localStorage.setItem("token", data.token);
+    window.location.href = "dashboard.html";
+  } else {
+    alert("Login failed");
+  }
+}
+</script>
+
+</body>
+
+</html>
+ dashboard.html (لوحة التحكم)
+
+Html
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Dashboard - Mix</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Mix Dashboard</h1>
+
+<button onclick="logout()">Logout</button>
+
+<h2>Add Chair</h2>
+
+<input id="name" placeholder="Name">
+<input id="color" placeholder="Color">
+<input id="price" type="number" placeholder="Price">
+<button onclick="addChair()">Add</button>
+
+<h2>Your Chairs</h2>
+<ul id="chairs"></ul>
+
+<script>
+const token = localStorage.getItem("token");
+if(!token) window.location.href = "login.html";
+
+async function loadChairs(){
+  const res = await fetch("/api/chairs", {
+    headers: { "Authorization": token }
+  });
+  const chairs = await res.json();
+
+  const list = document.getElementById("chairs");
+  list.innerHTML = "";
+
+  chairs.forEach(c=>{
+    const li = document.createElement("li");
+    li.innerText = `${c.name} - ${c.color} - $${c.price}`;
+    list.appendChild(li);
+  });
+}
+
+async function addChair(){
+  const name = document.getElementById("name").value;
+  const color = document.getElementById("color").value;
+  const price = document.getElementById("price").value;
+
+  await fetch("/api/chairs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({ name, color, price })
+  });
+
+  loadChairs();
+}
+
+function logout(){
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
+}
+
+loadChairs();
+</script>
+
+</body>
+</html>
+ style.css
+
+Css
+body {
+  font-family: Arial;
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+input {
+  display: block;
+  margin: 10px auto;
+  padding: 8px;
+  width: 80%;
+}
+
+button {
+  padding: 8px 15px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.center {
+  margin-top: 40px;
+}
