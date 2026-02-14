@@ -479,5 +479,5 @@ else
     echo " frontend/index.html missing"
 fi
 
-echo "💡 Mix Platform pre-check completed."
+echo " Mix Platform pre-check completed."
 echo "You can now run scripts/start.sh to launch Mix Platform."
