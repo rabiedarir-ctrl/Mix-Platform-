@@ -1,1 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Mix Platform</title>
+<style>
+body {
+  font-family: Arial;
+  max-width: 700px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
 
+input {
+  display: block;
+  margin: 8px auto;
+  padding: 8px;
+  width: 80%;
+}
+
+button {
+  padding: 8px 15px;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.hidden {
+  display: none;
+}
+
+h2 {
+  margin-top: 30px;
+}
+</style>
+</head>
+<body>
+
+<h1>Mix Platform</h1>
+
+<!-- ===== AUTH SECTION ===== -->
+
+<div id="authSection">
+
+<h2>Register</h2>
+<input id="regEmail" placeholder="Email">
+<input id="regPassword" type="password" placeholder="Password">
+<button onclick="register()">Register</button>
+
+<h2>Login</h2>
+<input id="logEmail" placeholder="Email">
+<input id="logPassword" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+
+</div>
+
+<!-- ===== DASHBOARD ===== -->
+
+<div id="dashboard" class="hidden">
+
+<button onclick="logout()">Logout</button>
+
+<h2>Add Chair</h2>
+<input id="name" placeholder="Name">
+<input id="color" placeholder="Color">
+<input id="price" type="number" placeholder="Price">
+<button onclick="addChair()">Add</button>
+
+<h2>Your Chairs</h2>
+<ul id="chairs"></ul>
+
+</div>
+
+<script>
+const API = "/api";
+let token = localStorage.getItem("token");
+
+if(token){
+  showDashboard();
+}
+
+function showDashboard(){
+  document.getElementById("authSection").classList.add("hidden");
+  document.getElementById("dashboard").classList.remove("hidden");
+  loadChairs();
+}
+
+function logout(){
+  localStorage.removeItem("token");
+  location.reload();
+}
+
+async function register(){
+  const email = document.getElementById("regEmail").value;
+  const password = document.getElementById("regPassword").value;
+
+  const res = await fetch(API + "/auth/register", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email, password })
+  });
+
+  if(res.ok){
+    alert("Registered successfully");
+  } else {
+    alert("Registration failed");
+  }
+}
+
+async function login(){
+  const email = document.getElementById("logEmail").value;
+  const password = document.getElementById("logPassword").value;
+
+  const res = await fetch(API + "/auth/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if(data.token){
+    localStorage.setItem("token", data.token);
+    token = data.token;
+    showDashboard();
+  } else {
+    alert("Login failed");
+  }
+}
+
+async function loadChairs(){
+  const res = await fetch(API + "/chairs", {
+    headers: { "Authorization": token }
+  });
+
+  const chairs = await res.json();
+  const list = document.getElementById("chairs");
+  list.innerHTML = "";
+
+  chairs.forEach(c=>{
+    const li = document.createElement("li");
+    li.innerHTML = `
+      ${c.name} - ${c.color} - $${c.price}
+      <button onclick="deleteChair('${c._id}')">Delete</button>
+    `;
+    list.appendChild(li);
+  });
+}
+
+async function addChair(){
+  const name = document.getElementById("name").value;
+  const color = document.getElementById("color").value;
+  const price = document.getElementById("price").value;
+
+  await fetch(API + "/chairs", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({ name, color, price })
+  });
+
+  loadChairs();
+}
+
+async function deleteChair(id){
+  await fetch(API + "/chairs/" + id, {
+    method: "DELETE",
+    headers: { "Authorization": token }
+  });
+
+  loadChairs();
+}
+</script>
+
+</body>
+</html>
