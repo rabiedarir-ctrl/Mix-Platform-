@@ -315,3 +315,38 @@ def load_data(filename="data.json"):
     except Exception as e:
         print(f" Failed to load {file_path}: {e}")
         return {}
+from flask import request, abort
+
+# ---------------------------
+# التحقق من رمز الدخول (Entry Code)
+# ---------------------------
+def check_entry(expected_code):
+    """
+    تتحقق هذه الدالة من أن أي طلب HTTP يحتوي على Header صحيح
+    'X-MIX-CODE' يطابق رمز الدخول في mix.config.json.
+    """
+    header_code = request.headers.get("X-MIX-CODE")
+    
+    if not header_code:
+        # إذا لم يوجد Header
+        abort(401, description="Unauthorized: Missing X-MIX-CODE header")
+    
+    if header_code != expected_code:
+        # إذا كان الرمز غير مطابق
+        abort(403, description="Forbidden: Invalid Entry Code")
+    
+    # إذا كان الرمز صحيح، يتم السماح بالطلب
+    return True
+
+# ---------------------------
+# مثال لتوسيع التحقق (صلاحيات المستخدم)
+# ---------------------------
+def check_permission(user_role, allowed_roles):
+    """
+    تحقق من صلاحيات المستخدم بناءً على دوره.
+    user_role: الدور الحالي للمستخدم
+    allowed_roles: قائمة بالأدوار المسموح بها
+    """
+    if user_role not in allowed_roles:
+        abort(403, description="Forbidden: Insufficient permissions")
+    return True
