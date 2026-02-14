@@ -84,3 +84,46 @@ Mix_Final/
 │
 └── logs/
     └── system.log 
+{
+  "platform": "Mix",
+  "version": "1.0.0",
+  "device_mode": "mobile",                     // وضع التشغيل على الهاتف
+  "entry_code": "MIX-001",                     // رمز دخول خاص للتحقق من الهوية
+  "storage_path": "/storage/emulated/0/Mix/storage", // مسار الملفات على الهاتف
+  "self_heal": true,                           // تمكين الإصلاح التلقائي للأخطاء
+  "logging": {                                 // إعدادات التسجيل
+    "enabled": true,
+    "level": "INFO",
+    "file": "/storage/emulated/0/Mix/logs/system.log"
+  },
+  "modules": {                                 // الوحدات النشطة
+    "gps": true,                               // نظام GPS للتتبع والمواقع
+    "wallet": true,                            // نظام المحافظ الرقمية والمدفوعات
+    "ai": true,                                // الذكاء والتحليل
+    "metaverse": true,                         // العالم الافتراضي
+    "matrix": true                             // نظام الماتريكس
+  },
+  "network": {                                 // إعدادات الشبكة
+    "online": true,
+    "api_endpoint": "http://localhost:5000",  // رابط Backend المحلي
+    "update_interval_sec": 300                 // تحديث البيانات كل 5 دقائق
+  },
+  "consent": {                                 // إعدادات الموافقات
+    "required": true,
+    "default_duration_hours": 24
+  },
+  "features": {                                // ميزات إضافية
+    "geofence_alert": true,                    // تنبيه عند الخروج من منطقة محددة
+    "sos_button": true,                        // زر الطوارئ SOS
+    "offline_cache": true                       // تخزين مؤقت في حالة عدم وجود اتصال
+  },
+  "backup": {                                  // إعدادات النسخ الاحتياطي
+    "enabled": true,
+    "backup_path": "/storage/emulated/0/Mix/backup",
+    "frequency_hours": 24
+  },
+  "security": {                                // إعدادات الأمان
+    "encryption": true,
+    "token_expiry_minutes": 60
+  }
+}
