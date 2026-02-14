@@ -350,3 +350,30 @@ def check_permission(user_role, allowed_roles):
     if user_role not in allowed_roles:
         abort(403, description="Forbidden: Insufficient permissions")
     return True
+from flask import jsonify
+
+def health_api(app):
+    """
+    هذه الدالة تضيف API لفحص صحة المنصة (Health Check)
+    يمكن استدعاؤها من app.py مباشرة
+    """
+
+    @app.route("/health", methods=["GET"])
+    def health():
+        """
+        API endpoint: /health
+        يعيد حالة المنصة ونسخة المنصة
+        """
+        try:
+            response = {
+                "status": "Mix Platform Alive",
+                "version": "1.0.0",  # يمكن سحب النسخة من mix.config.json لاحقًا
+                "modules": {
+                    "gps": True,       # مثال: يمكن التعديل حسب mix.config.json
+                    "wallet": True,
+                    "ai": True
+                }
+            }
+            return jsonify(response)
+        except Exception as e:
+            return jsonify({"status": "error", "message": str(e)}), 500
